@@ -1,0 +1,23 @@
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import generated.MiniCLexer;
+import generated.MiniCParser;
+
+import java.io.FileWriter;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        MiniCLexer lexer = new MiniCLexer(CharStreams.fromFileName("./input.mc"));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        MiniCParser parser = new MiniCParser(tokens);
+        ParseTree tree = parser.program();
+
+        ParseTreeWalker walker = new ParseTreeWalker();
+        MiniCUglyPrinter uglyPrinter = new MiniCUglyPrinter();
+        walker.walk(uglyPrinter, tree);
+        FileWriter fw = new FileWriter("./output.ir");
+        fw.write(uglyPrinter.uglyResult.toString());
+
+
+    }
+}
