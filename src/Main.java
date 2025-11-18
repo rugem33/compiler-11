@@ -10,14 +10,15 @@ public class Main {
         MiniCLexer lexer = new MiniCLexer(CharStreams.fromFileName("./input.mc"));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         MiniCParser parser = new MiniCParser(tokens);
+
         ParseTree tree = parser.program();
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        MiniCUglyPrinter uglyPrinter = new MiniCUglyPrinter();
-        walker.walk(uglyPrinter, tree);
+        IRPrinter irPrinter = new IRPrinter();
+        walker.walk(irPrinter, tree);
         FileWriter fw = new FileWriter("./output.ir");
-        fw.write(uglyPrinter.uglyResult.toString());
-
-
+        fw.write(irPrinter.irResult.toString());
+        fw.close();
+        System.out.println(irPrinter.irResult.toString());
     }
 }

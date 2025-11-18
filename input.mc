@@ -1,6 +1,6 @@
-void main(){
-    int a = 1;
-    while(a == 2){
-        a = a + 1;
-    }
+void main(int a, int b){
+    int y;
+    int x = 3;
+    x = -(1 + 2 + 3);
+    fun(1 + 2, 3 + 4);
 }

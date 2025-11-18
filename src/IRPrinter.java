@@ -2,33 +2,58 @@ import generated.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-enum tmpList {
-    t0("t0"),
-    t1("t1"),
-    t2("t2"),
-    t3("t3"),
-    t4("t4"),
-    t5("t5"),
-    t6("t6"),
-    t7("t7"),
-    t8("t8"),
-    t9("t9")
-    ;
-    int tmpNum = -1;
+class TmpList {
+    enum Tmp {
+        t0("t0"),
+        t1("t1"),
+        t2("t2"),
+        t3("t3"),
+        t4("t4"),
+        t5("t5"),
+        t6("t6"),
+        t7("t7"),
+        t8("t8"),
+        t9("t9");
 
-    private final String label;
+        private final String label;
 
-    tmpList(String label) {
-        this.label = label;
+        Tmp(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
     }
 
-    public String getTmp() {
+    private static int tmpNum = -1;
+
+    // 다음 tmp 이름 하나 꺼내기
+    public static String getTmp() {
+        if (tmpNum + 1 >= Tmp.values().length) {
+            throw new IllegalStateException("더 이상 사용할 수 있는 tmp가 없습니다.");
+            // 혹은: tmpNum = -1; 처럼 다시 처음으로 돌려도 되고
+        }
         tmpNum++;
-        return tmpList.values()[tmpNum].label;
+        return Tmp.values()[tmpNum].getLabel();
     }
 
-    public void returnTmp(){
+    // 하나 되돌리기
+    public static void returnTmp() {
         tmpNum--;
+        // 아니면 음수로 내려가면 예외 던지게 해도 됨
+    }
+
+    public static String getCurrentTmp() {
+        return Tmp.values()[tmpNum].getLabel();
+    }
+
+    public static String getTmpIndex(int i) {
+        return Tmp.values()[i].getLabel();
+    }
+
+    public static int getCurrentIndex() {
+        return tmpNum;
     }
 }
 
@@ -36,13 +61,51 @@ public class IRPrinter extends MiniCBaseListener {
     public StringBuilder irResult = new StringBuilder();
     ParseTreeProperty<String> r4tree = new ParseTreeProperty<>();
 
+    private String toBinaryOp(String opText) {
+        switch (opText) {
+            case "*":  return "mul";
+            case "/":  return "div";
+            case "%":  return "mod";
+            case "+":  return "add";
+            case "-":  return "sub";
+            case "==": return "eq";
+            case "!=": return "neq";
+            case "<=": return "leq";
+            case "<":  return "lt";
+            case ">=": return "geq";
+            case ">":  return "gt";
+            case "and": return "and";
+            case "or":  return "or";
+            default:
+                throw new IllegalArgumentException("unknown binary op: " + opText);
+        }
+    }
+
+    private String toUnaryOp(String opText) {
+        switch (opText) {
+            case "-": return "neg";
+            case "+": return "pos";
+            case "--": return "dec";
+            case "++": return "inc";
+            case "!": return "not";
+            default:
+                throw new IllegalArgumentException("unknown binary op: " + opText);
+        }
+    }
+
     @Override public void enterProgram(MiniCParser.ProgramContext ctx) { }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitProgram(MiniCParser.ProgramContext ctx) { }
+    @Override public void exitProgram(MiniCParser.ProgramContext ctx) {
+        StringBuilder sb = new StringBuilder();
+        for (MiniCParser.DeclContext d : ctx.decl()) {
+            sb.append(r4tree.get(d)).append("\n");
+        }
+        irResult.append(sb.toString());
+    }
     /**
      * {@inheritDoc}
      *
@@ -54,7 +117,13 @@ public class IRPrinter extends MiniCBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitDecl(MiniCParser.DeclContext ctx) { }
+    @Override public void exitDecl(MiniCParser.DeclContext ctx) {
+        if (ctx.var_decl() != null) {
+            r4tree.put(ctx, r4tree.get(ctx.var_decl()));
+        } else if (ctx.fun_decl() != null) {
+            r4tree.put(ctx, r4tree.get(ctx.fun_decl()));
+        }
+    }
     /**
      * {@inheritDoc}
      *
@@ -168,60 +237,128 @@ public class IRPrinter extends MiniCBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void enterLocal_decl(MiniCParser.Local_declContext ctx) { }
+    @Override public void exitLocal_decl(MiniCParser.Local_declContext ctx) {
+        if (ctx.getChildCount() == 3) { return;}
+        String ident = ctx.IDENT().getText();
+        String opcode = "=";
+        String lit = ctx.LITERAL().getText();
+
+        String result = ident + " " + opcode + " " + lit;
+
+        irResult.append(result).append("\n");
+        r4tree.put(ctx, ident);
+        return;
+    }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void exitLocal_decl(MiniCParser.Local_declContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override public void enterIf_stmt(MiniCParser.If_stmtContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+
     @Override public void exitIf_stmt(MiniCParser.If_stmtContext ctx) { }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void enterReturn_stmt(MiniCParser.Return_stmtContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+
     @Override public void exitReturn_stmt(MiniCParser.Return_stmtContext ctx) { }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void enterExpr(MiniCParser.ExprContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override public void exitExpr(MiniCParser.ExprContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
-    @Override public void enterArgs(MiniCParser.ArgsContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+
+    @Override public void exitExpr(MiniCParser.ExprContext ctx) {
+        String resultCode;
+        // (a) IDENT
+        if (ctx.IDENT() != null && ctx.getChildCount() == 1 ) {
+            r4tree.put(ctx, ctx.IDENT().getText());
+            return;
+        }
+
+        // (b) LITERAL
+        if (ctx.LITERAL() != null && ctx.getChildCount() == 1) {
+            r4tree.put(ctx, ctx.LITERAL().getText());
+            return;
+        }
+
+        // (c) a + b 같은 expr '+' expr
+        if (ctx.getChildCount() == 3 && ctx.expr().size() == 2) {
+
+            String opnd1 = r4tree.get(ctx.expr(0));  // "a"
+            String opnd2 = r4tree.get(ctx.expr(1));  // "b"
+            String opcode = toBinaryOp(ctx.getChild(1).getText());
+            String tmp = TmpList.getTmp();    // "t1" 같은 임시 변수 이름
+
+            // 3주소 코드 한 줄 생성
+            resultCode = tmp + " = " + opnd1 + " " + opcode + " "  + opnd2;
+
+            // 출력용 버퍼에 추가
+            irResult.append(resultCode).append("\n");
+
+            // 이 expr의 값은 tmp 라고 저장 (위쪽에서 또 쓸 수 있게)
+            r4tree.put(ctx, tmp);
+            return;
+        }
+
+        if (ctx.getChildCount() == 2 && ctx.expr().size() == 1 && ctx.getChild(1).getChildCount() == 1) {
+            String opnd1 = r4tree.get(ctx.expr(0));
+            String opcode = toUnaryOp(ctx.getChild(0).getText());
+
+            resultCode = opcode + " " + opnd1;
+
+            irResult.append(resultCode).append("\n");
+            r4tree.put(ctx, opnd1);
+            return;
+
+        } else if (ctx.getChildCount() == 2 && ctx.expr().size() == 1 && ctx.getChild(1).getChildCount() != 1) {
+            String open1 = TmpList.getCurrentTmp();
+            String opcode = toUnaryOp(ctx.getChild(0).getText());
+
+            resultCode = opcode + " " + open1;
+            irResult.append(resultCode).append("\n");
+            r4tree.put(ctx, open1);
+            return;
+        }
+
+        if (ctx.getChildCount() == 3 && ctx.expr().size() == 1 && ctx.getChild(1).getText().equals("=")) {
+            String opnd1 = r4tree.get(ctx.expr(0));
+            String opcode = "=";
+            String tmp = TmpList.getTmp();
+
+            resultCode = tmp + " " + opcode + " " + opnd1;
+            irResult.append(resultCode).append("\n");
+            r4tree.put(ctx, tmp);
+            return;
+        }
+
+        if (ctx.args() != null) {
+            System.out.println(ctx.expr().toString());
+            int argCount = (ctx.getChild(2).getChildCount() - (ctx.getChild(1).getChildCount() / 2));
+            String ident = ctx.IDENT().getText();
+            String tmp = TmpList.getTmp();
+            if (argCount == 0) {
+                resultCode = tmp + " = call " + ident + "()";
+                irResult.append(resultCode).append("\n");
+                r4tree.put(ctx, tmp);
+                return;
+            }else if (argCount == 1) {
+                resultCode = tmp + " = call " + ident + "(" + r4tree.get(ctx.expr(0)) + ")";
+                irResult.append(resultCode).append("\n");
+                r4tree.put(ctx, tmp);
+            }else{
+                resultCode = tmp + " = call " + ident + "(";
+                for (int i = 0; i < argCount - 2; i++) {
+                    resultCode += r4tree.get(ctx.expr(0)) + ", ";
+                }
+                resultCode += r4tree.get(ctx.expr(0)) + ")";
+                irResult.append(resultCode).append("\n");
+                r4tree.put(ctx, tmp);
+            }
+        }
+    }
+
     @Override public void exitArgs(MiniCParser.ArgsContext ctx) { }
 
     /**
@@ -229,12 +366,7 @@ public class IRPrinter extends MiniCBaseListener {
      *
      * <p>The default implementation does nothing.</p>
      */
-    @Override public void enterEveryRule(ParserRuleContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+
     @Override public void exitEveryRule(ParserRuleContext ctx) { }
     /**
      * {@inheritDoc}

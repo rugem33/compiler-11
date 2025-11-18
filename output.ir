@@ -1,0 +1,9 @@
+x = 3
+t0 = 1 add 2
+t1 = t0 add 3
+neg t1
+t2 = t1
+t3 = 1 add 2
+t4 = 3 add 4
+t5 = call fun(null, null)
+null
