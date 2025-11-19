@@ -262,12 +262,14 @@ public class IRPrinter extends MiniCBaseListener {
      * <p>The default implementation does nothing.</p>
      */
 
-    @Override public void exitReturn_stmt(MiniCParser.Return_stmtContext ctx) { }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+    @Override public void exitReturn_stmt(MiniCParser.Return_stmtContext ctx) {
+        if (ctx.getChildCount() == 2) {
+            irResult.append("return").append("\n");
+        }else {
+            String returnVal = "return " + r4tree.get(ctx.expr());
+            irResult.append(returnVal).append("\n");
+        }
+    }
 
     @Override public void exitExpr(MiniCParser.ExprContext ctx) {
         String resultCode;
@@ -334,38 +336,26 @@ public class IRPrinter extends MiniCBaseListener {
         }
 
         if (ctx.args() != null) {
-            System.out.println(ctx.expr().toString());
-            int argCount = (ctx.getChild(2).getChildCount() - (ctx.getChild(1).getChildCount() / 2));
             String ident = ctx.IDENT().getText();
             String tmp = TmpList.getTmp();
-            if (argCount == 0) {
-                resultCode = tmp + " = call " + ident + "()";
-                irResult.append(resultCode).append("\n");
-                r4tree.put(ctx, tmp);
-                return;
-            }else if (argCount == 1) {
-                resultCode = tmp + " = call " + ident + "(" + r4tree.get(ctx.expr(0)) + ")";
-                irResult.append(resultCode).append("\n");
-                r4tree.put(ctx, tmp);
-            }else{
-                resultCode = tmp + " = call " + ident + "(";
-                for (int i = 0; i < argCount - 2; i++) {
-                    resultCode += r4tree.get(ctx.expr(0)) + ", ";
-                }
-                resultCode += r4tree.get(ctx.expr(0)) + ")";
-                irResult.append(resultCode).append("\n");
-                r4tree.put(ctx, tmp);
-            }
+            String args = r4tree.get(ctx.args());
+            resultCode = tmp + " = call " + ident + "(" + args + ")\n";
+            irResult.append(resultCode).append("\n");
+            r4tree.put(ctx, tmp);
         }
     }
 
-    @Override public void exitArgs(MiniCParser.ArgsContext ctx) { }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
+    @Override public void exitArgs(MiniCParser.ArgsContext ctx) {
+        if (ctx.getChildCount() == 0) {return;} else{
+            int argCount = ctx.getChildCount() - (ctx.getChildCount() / 2);
+            String args = "";
+            for (int i = 0;  i < argCount - 1; i++) {
+                args += r4tree.get(ctx.expr(i)) + ", ";
+            }
+            args += r4tree.get(ctx.expr(argCount - 1));
+            r4tree.put(ctx, args);
+        }
+    }
 
     @Override public void exitEveryRule(ParserRuleContext ctx) { }
     /**

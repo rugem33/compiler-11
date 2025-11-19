@@ -5,5 +5,8 @@ neg t1
 t2 = t1
 t3 = 1 add 2
 t4 = 3 add 4
-t5 = call fun(null, null)
+t5 = call fun(t3, t4)
+
+t6 = 1 add 2
+return t6
 null

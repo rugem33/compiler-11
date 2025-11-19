@@ -3,4 +3,5 @@ void main(int a, int b){
     int x = 3;
     x = -(1 + 2 + 3);
     fun(1 + 2, 3 + 4);
+    return 1 + 2;
 }
