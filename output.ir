@@ -6,7 +6,12 @@ t2 = t1
 t3 = 1 add 2
 t4 = 3 add 4
 t5 = call fun(t3, t4)
-
 t6 = 1 add 2
 return t6
+t7 = 1 add 2
+t8 = t7 add 3
+t9 = t8
+t10 = 4 add 5
+t11 = t10 add 6
+t12 = t11
 null

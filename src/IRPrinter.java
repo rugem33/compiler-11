@@ -13,7 +13,13 @@ class TmpList {
         t6("t6"),
         t7("t7"),
         t8("t8"),
-        t9("t9");
+        t9("t9"),
+        t10("t10"),
+        t11("t11"),
+        t12("t12"),
+        t13("t13"),
+        t14("t14"),
+        t15("t15");
 
         private final String label;
 
@@ -339,7 +345,7 @@ public class IRPrinter extends MiniCBaseListener {
             String ident = ctx.IDENT().getText();
             String tmp = TmpList.getTmp();
             String args = r4tree.get(ctx.args());
-            resultCode = tmp + " = call " + ident + "(" + args + ")\n";
+            resultCode = tmp + " = call " + ident + "(" + args + ")";
             irResult.append(resultCode).append("\n");
             r4tree.put(ctx, tmp);
         }
