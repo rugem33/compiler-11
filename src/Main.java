@@ -19,6 +19,6 @@ public class Main {
         FileWriter fw = new FileWriter("./output.ir");
         fw.write(irPrinter.irResult.toString());
         fw.close();
-        System.out.println(irPrinter.irResult.toString());
+
     }
 }
