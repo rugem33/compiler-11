@@ -290,23 +290,39 @@ public class IRPrinter extends MiniCBaseListener {
 
 
     @Override public void exitIf_stmt(MiniCParser.If_stmtContext ctx) {
-        String tmp = TmpList.getTmp();
-        String condExpr = r4tree.get(ctx.expr());
-        String cond = "not " + getVariable(condExpr) + "\n";
-        String printCondExpr = condExpr + "\n";
-        String printCond = tmp + " = " + cond;
+        if (ctx.ELSE() != null) {
+            String tmp = TmpList.getTmp();
+            String condExpr = r4tree.get(ctx.expr());
+            String cond = "not " + getVariable(condExpr) + "\n";
+            String printCondExpr = condExpr + "\n";
+            String printCond = tmp + " = " + cond;
 
-        String label1 = LabelList.getLabels();
-        String label2 = LabelList.getLabels();
+            String label1 = LabelList.getLabels();
+            String label2 = LabelList.getLabels();
 
-        String printCjump = "cjump " + tmp + " " + label1 + "\n";
-        String printStmt1 = r4tree.get(ctx.stmt(0)) + "\n";
-        String printJump = "jump " + label2 + "\n";
-        String lb1 = label1 + ":\n";
-        String printStmt2 = r4tree.get(ctx.stmt(1)) + "\n";
-        String lb2 = label2 + ":";
-        String resultCode = printCondExpr + printCond + printCjump + printStmt1 + printJump + lb1 + printStmt2 + lb2;
-        r4tree.put(ctx, resultCode);
+            String printCjump = "cjump " + tmp + " " + label1 + "\n";
+            String printStmt1 = r4tree.get(ctx.stmt(0)) + "\n";
+            String printJump = "jump " + label2 + "\n";
+            String lb1 = label1 + ":\n";
+            String printStmt2 = r4tree.get(ctx.stmt(1)) + "\n";
+            String lb2 = label2 + ":";
+            String resultCode = printCondExpr + printCond + printCjump + printStmt1 + printJump + lb1 + printStmt2 + lb2;
+            r4tree.put(ctx, resultCode);
+        } else {
+            String tmp = TmpList.getTmp();
+            String condExpr = r4tree.get(ctx.expr());
+            String cond = "not " + getVariable(condExpr) + "\n";
+            String printCondExpr = condExpr + "\n";
+            String printCond = tmp + " = " + cond;
+
+            String label1 = LabelList.getLabels();
+
+            String printCjump = "cjump " + tmp + " " + label1 + "\n";
+            String printStmt1 = r4tree.get(ctx.stmt(0)) + "\n";
+            String lb1 = label1 + ":\n";
+            String resultCode = printCondExpr + printCond + printCjump + printStmt1 + lb1;
+            r4tree.put(ctx, resultCode);
+        }
     }
     /**
      * {@inheritDoc}
@@ -447,7 +463,7 @@ public class IRPrinter extends MiniCBaseListener {
                 argsExpr += srcExpr + "\n";
             }
             srcExpr = r4tree.get(ctx.expr(argCount - 1));
-            args += srcExpr.substring(0, srcExpr.indexOf(" "));
+            args += getVariable(srcExpr);
             argsExpr += srcExpr + "\n";
 
             String resultCode = argsExpr + args;
