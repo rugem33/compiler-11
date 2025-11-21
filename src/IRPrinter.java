@@ -129,7 +129,13 @@ public class IRPrinter extends MiniCBaseListener {
     private String getVariable (String inputText){
         String var;
         if(inputText.contains(" ")){
-            var = inputText.substring(0, inputText.indexOf(" "));
+            int beginIndex = inputText.indexOf("\n",0,inputText.length()-1);
+            if(inputText.contains("\n") && beginIndex != -1 ){
+                String tmpStr = inputText.substring(beginIndex + 1, inputText.length());
+                var = tmpStr.substring(0, tmpStr.indexOf(" "));
+            } else {
+                var = inputText.substring(0, inputText.indexOf(" "));
+            }
         } else {
             var = inputText;
         }
@@ -336,11 +342,13 @@ public class IRPrinter extends MiniCBaseListener {
             String srcExpr = r4tree.get(ctx.expr());
             // check return expr
             if(ctx.expr().getChildCount() != 1){
+                // return expr
                 String beforeExpr = srcExpr + "\n";
                 String returnVal = "return " + getVariable(srcExpr);
                 String resultCode = beforeExpr + returnVal;
-                r4tree.put(ctx, resultCode);
+                r4tree.put(ctx, resultCode + "\n");
             }else{
+                // return ident or lit
                 String returnVal = "return " + getVariable(srcExpr);
                 String resultCode = returnVal;
                 r4tree.put(ctx, resultCode);
@@ -457,7 +465,7 @@ public class IRPrinter extends MiniCBaseListener {
                 String ident = ctx.IDENT().getText();
                 String tmp = TmpList.getTmp();
                 String argsExpr = r4tree.get(ctx.args());
-                String args = argsExpr.substring(argsExpr.lastIndexOf("\n") + 1, argsExpr.length());
+                String args = argsExpr.substring(0, argsExpr.length());
                 resultCode = tmp + " = call " + ident + "(" + args + ")";
                 r4tree.put(ctx, resultCode + "\n");
                 return;
@@ -466,8 +474,8 @@ public class IRPrinter extends MiniCBaseListener {
                 String ident = ctx.IDENT().getText();
                 String tmp = TmpList.getTmp();
                 String argsExpr = r4tree.get(ctx.args());
-                String args = argsExpr.substring(argsExpr.lastIndexOf("\n") + 1, argsExpr.length());
-                String declArgs = argsExpr.substring(0, argsExpr.lastIndexOf("\n") + 1);
+                String args = argsExpr.substring(0, argsExpr.indexOf(" "));
+                String declArgs = argsExpr.substring(0, argsExpr.lastIndexOf("\n"));
                 resultCode = declArgs + tmp + " = call " + ident + "(" + args + ")";
                 r4tree.put(ctx, resultCode + "\n");
                 return;
@@ -490,8 +498,8 @@ public class IRPrinter extends MiniCBaseListener {
             args += getVariable(srcExpr);
             argsExpr += srcExpr + "\n";
 
-            String resultCode = argsExpr + args;
-            r4tree.put(ctx, resultCode + "\n");
+            String resultCode = argsExpr;
+            r4tree.put(ctx, resultCode);
         }
     }
 }

@@ -5,14 +5,14 @@ cjump t1 l0
 return 1
 l0:
 t2 = i sub 1
+t3 = call fac(t2)
 
-t2
-t3 = call fac()
+t4 = t3 mul i
 
-t4 = t2 mul i
-
-return t2end function
+return t3
+end function
 function main ()V
 x = 3
-t5 = call fac()
+t5 = call fac(x
+)
 end function
