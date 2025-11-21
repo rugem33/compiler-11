@@ -2,20 +2,17 @@ function fac (I)I
 t0 = x leq 1
 t1 = not t0
 cjump t1 l0
-1
 return 1
-
-
-
 l0:
-
 t2 = i sub 1
-t3 = call fac(t2)
+
+t2
+t3 = call fac()
+
 t4 = t2 mul i
-return t2
 
-
-end function
+return t2end function
 function main ()V
-x = 3x
-t5 = call fac(x)end function
+x = 3
+t5 = call fac()
+end function

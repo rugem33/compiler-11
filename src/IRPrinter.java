@@ -225,9 +225,9 @@ public class IRPrinter extends MiniCBaseListener {
 
     @Override public void exitStmt(MiniCParser.StmtContext ctx) {
         if(ctx.return_stmt() != null) {
-            r4tree.put(ctx, r4tree.get(ctx.return_stmt()) + "\n");
+            r4tree.put(ctx, r4tree.get(ctx.return_stmt()));
         } else if (ctx.if_stmt() != null) {
-            r4tree.put(ctx, r4tree.get(ctx.if_stmt()) + "\n");
+            r4tree.put(ctx, r4tree.get(ctx.if_stmt()));
         } else if (ctx.compound_stmt() != null) {
             String expr = r4tree.get(ctx.compound_stmt());
             r4tree.put(ctx, expr);
@@ -235,13 +235,12 @@ public class IRPrinter extends MiniCBaseListener {
             String expr = r4tree.get(ctx.expr_stmt());
             r4tree.put(ctx, expr);
         } else if(ctx.while_stmt() != null) {
-            r4tree.put(ctx, r4tree.get(ctx.while_stmt()) + "\n");
+            r4tree.put(ctx, r4tree.get(ctx.while_stmt()));
         }
     }
 
     @Override public void exitExpr_stmt(MiniCParser.Expr_stmtContext ctx) {
         String expr = r4tree.get(ctx.expr());
-
         r4tree.put(ctx, expr);
 
     }
@@ -294,7 +293,7 @@ public class IRPrinter extends MiniCBaseListener {
             String tmp = TmpList.getTmp();
             String condExpr = r4tree.get(ctx.expr());
             String cond = "not " + getVariable(condExpr) + "\n";
-            String printCondExpr = condExpr + "\n";
+            String printCondExpr = condExpr;
             String printCond = tmp + " = " + cond;
 
             String label1 = LabelList.getLabels();
@@ -312,7 +311,7 @@ public class IRPrinter extends MiniCBaseListener {
             String tmp = TmpList.getTmp();
             String condExpr = r4tree.get(ctx.expr());
             String cond = "not " + getVariable(condExpr) + "\n";
-            String printCondExpr = condExpr + "\n";
+            String printCondExpr = condExpr;
             String printCond = tmp + " = " + cond;
 
             String label1 = LabelList.getLabels();
@@ -335,10 +334,17 @@ public class IRPrinter extends MiniCBaseListener {
             r4tree.put(ctx, "return");
         }else {
             String srcExpr = r4tree.get(ctx.expr());
-            String beforeExpr = srcExpr + "\n";
-            String returnVal = "return " + getVariable(srcExpr) + "\n";
-            String resultCode = beforeExpr + returnVal + "\n";
-            r4tree.put(ctx, resultCode);
+            // check return expr
+            if(ctx.expr().getChildCount() != 1){
+                String beforeExpr = srcExpr + "\n";
+                String returnVal = "return " + getVariable(srcExpr);
+                String resultCode = beforeExpr + returnVal;
+                r4tree.put(ctx, resultCode);
+            }else{
+                String returnVal = "return " + getVariable(srcExpr);
+                String resultCode = returnVal;
+                r4tree.put(ctx, resultCode);
+            }
         }
     }
 
@@ -361,7 +367,7 @@ public class IRPrinter extends MiniCBaseListener {
             String srcExpr = r4tree.get(ctx.expr(0));
             String opnd1 = srcExpr;
             resultCode = ident + " = " + opnd1;
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
             return;
         }
         // ident = expr
@@ -371,7 +377,7 @@ public class IRPrinter extends MiniCBaseListener {
             String beforeExpr = srcExpr + "\n";
             String opnd1 = TmpList.getCurrentTmp();
             resultCode = beforeExpr + ident + " = " + opnd1;
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
             return;
         }
 
@@ -396,7 +402,7 @@ public class IRPrinter extends MiniCBaseListener {
             // 출력용 버퍼에 추가
 
             // 이 expr의 값은 tmp 라고 저장 (위쪽에서 또 쓸 수 있게)
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
             return;
         }
         // ++ -- op IDENT
@@ -406,7 +412,7 @@ public class IRPrinter extends MiniCBaseListener {
             String tmp = TmpList.getTmp();
             String opcode = toUnaryOp(ctx.getChild(0).getText());
             resultCode = tmp + " = " + opcode + " " + opnd1;
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
             return;
         }
         // ++ -- op expr
@@ -417,7 +423,7 @@ public class IRPrinter extends MiniCBaseListener {
             String opcode = toUnaryOp(ctx.getChild(0).getText());
             String beforeExpr = srcExpr + "\n";
             resultCode = beforeExpr + tmp + " = " + opcode + " " + opnd1;
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
             return;
         }
          // ( expr )
@@ -434,20 +440,38 @@ public class IRPrinter extends MiniCBaseListener {
             String tmp = TmpList.getTmp();
             String beforeExpr = srcExpr + "\n";
             resultCode = beforeExpr + tmp + " " + opcode + " " + opnd1;
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
             return;
         }
 
-        // return args
+        // call func
         if (ctx.args() != null) {
-            String ident = ctx.IDENT().getText();
-            String tmp = TmpList.getTmp();
-            String argsExpr = r4tree.get(ctx.args());
-            String args = argsExpr.substring(argsExpr.lastIndexOf("\n") + 1, argsExpr.length());
-            String declArgs = argsExpr.substring(0, argsExpr.lastIndexOf("\n") + 1);
-            resultCode = declArgs + tmp + " = call " + ident + "(" + args + ")";
-            r4tree.put(ctx, resultCode);
-
+            boolean checkOnlyIdent = true;
+            for (int i = 0; i < ctx.args().getChildCount(); i++) {
+                if(ctx.args().getChild(i).getChildCount() != 1) {
+                    checkOnlyIdent = false;
+                }
+            }
+            if (checkOnlyIdent) {
+                // call func (ident)
+                String ident = ctx.IDENT().getText();
+                String tmp = TmpList.getTmp();
+                String argsExpr = r4tree.get(ctx.args());
+                String args = argsExpr.substring(argsExpr.lastIndexOf("\n") + 1, argsExpr.length());
+                resultCode = tmp + " = call " + ident + "(" + args + ")";
+                r4tree.put(ctx, resultCode + "\n");
+                return;
+            } else {
+                // call func (expr)
+                String ident = ctx.IDENT().getText();
+                String tmp = TmpList.getTmp();
+                String argsExpr = r4tree.get(ctx.args());
+                String args = argsExpr.substring(argsExpr.lastIndexOf("\n") + 1, argsExpr.length());
+                String declArgs = argsExpr.substring(0, argsExpr.lastIndexOf("\n") + 1);
+                resultCode = declArgs + tmp + " = call " + ident + "(" + args + ")";
+                r4tree.put(ctx, resultCode + "\n");
+                return;
+            }
         }
     }
 
@@ -467,7 +491,7 @@ public class IRPrinter extends MiniCBaseListener {
             argsExpr += srcExpr + "\n";
 
             String resultCode = argsExpr + args;
-            r4tree.put(ctx, resultCode);
+            r4tree.put(ctx, resultCode + "\n");
         }
     }
 }
