@@ -19,7 +19,7 @@ public class MiniCLexer extends Lexer {
 	public static final int
 		T__0=1, T__1=2, T__2=3, T__3=4, T__4=5, T__5=6, T__6=7, T__7=8, T__8=9, 
 		T__9=10, T__10=11, T__11=12, T__12=13, T__13=14, T__14=15, T__15=16, T__16=17, 
-		T__17=18, T__18=19, VOID=20, INT=21, WHILE=22, IF=23, ElnE=24, RETURN=25, 
+		T__17=18, T__18=19, VOID=20, INT=21, WHILE=22, IF=23, ELSE=24, RETURN=25, 
 		OR=26, AND=27, LE=28, GE=29, EQ=30, NE=31, IDENT=32, LITERAL=33, DecimalConstant=34, 
 		OctalConstant=35, HexadecimalConstant=36, WS=37;
 	public static String[] channelNames = {
@@ -34,7 +34,7 @@ public class MiniCLexer extends Lexer {
 		return new String[] {
 			"T__0", "T__1", "T__2", "T__3", "T__4", "T__5", "T__6", "T__7", "T__8", 
 			"T__9", "T__10", "T__11", "T__12", "T__13", "T__14", "T__15", "T__16", 
-			"T__17", "T__18", "VOID", "INT", "WHILE", "IF", "ElnE", "RETURN", "OR", 
+			"T__17", "T__18", "VOID", "INT", "WHILE", "IF", "ELSE", "RETURN", "OR", 
 			"AND", "LE", "GE", "EQ", "NE", "IDENT", "LITERAL", "DecimalConstant", 
 			"OctalConstant", "HexadecimalConstant", "WS"
 		};
@@ -45,7 +45,7 @@ public class MiniCLexer extends Lexer {
 		return new String[] {
 			null, "';'", "'='", "'['", "']'", "'('", "')'", "','", "'{'", "'}'", 
 			"'-'", "'+'", "'--'", "'++'", "'*'", "'/'", "'%'", "'<'", "'>'", "'!'", 
-			"'void'", "'int'", "'while'", "'if'", "'elne'", "'return'", "'or'", "'and'", 
+			"'void'", "'int'", "'while'", "'if'", "'else'", "'return'", "'or'", "'and'", 
 			"'<='", "'>='", "'=='", "'!='"
 		};
 	}
@@ -54,7 +54,7 @@ public class MiniCLexer extends Lexer {
 		return new String[] {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, "VOID", "INT", "WHILE", 
-			"IF", "ElnE", "RETURN", "OR", "AND", "LE", "GE", "EQ", "NE", "IDENT", 
+			"IF", "ELSE", "RETURN", "OR", "AND", "LE", "GE", "EQ", "NE", "IDENT", 
 			"LITERAL", "DecimalConstant", "OctalConstant", "HexadecimalConstant", 
 			"WS"
 		};
@@ -209,7 +209,7 @@ public class MiniCLexer extends Lexer {
 		"e\u0000\u0000\u0081,\u0001\u0000\u0000\u0000\u0082\u0083\u0005i\u0000"+
 		"\u0000\u0083\u0084\u0005f\u0000\u0000\u0084.\u0001\u0000\u0000\u0000\u0085"+
 		"\u0086\u0005e\u0000\u0000\u0086\u0087\u0005l\u0000\u0000\u0087\u0088\u0005"+
-		"n\u0000\u0000\u0088\u0089\u0005e\u0000\u0000\u00890\u0001\u0000\u0000"+
+		"s\u0000\u0000\u0088\u0089\u0005e\u0000\u0000\u00890\u0001\u0000\u0000"+
 		"\u0000\u008a\u008b\u0005r\u0000\u0000\u008b\u008c\u0005e\u0000\u0000\u008c"+
 		"\u008d\u0005t\u0000\u0000\u008d\u008e\u0005u\u0000\u0000\u008e\u008f\u0005"+
 		"r\u0000\u0000\u008f\u0090\u0005n\u0000\u0000\u00902\u0001\u0000\u0000"+

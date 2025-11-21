@@ -169,13 +169,13 @@ public class IRPrinter extends MiniCBaseListener {
     }
 
 
-    /*@Override public void exitProgram(MiniCParser.ProgramContext ctx) {
+    @Override public void exitProgram(MiniCParser.ProgramContext ctx) {
         StringBuilder sb = new StringBuilder();
-        for (int j = 0; j < ctx.getChildCount()-1; j++) {
+        for (int j = 0; j < ctx.decl().size(); j++) {
             sb.append(r4tree.get(ctx.decl(j)));
         }
         irResult.append(sb.toString());
-    }*/
+    }
 
     @Override public void exitDecl(MiniCParser.DeclContext ctx) {
         if (ctx.var_decl() != null) {
@@ -219,7 +219,6 @@ public class IRPrinter extends MiniCBaseListener {
         String printEnd = "end function\n";
         String resultCode = printInit + printCompStmt + printEnd;
         r4tree.put(ctx, resultCode);
-
     }
 
 
@@ -230,10 +229,11 @@ public class IRPrinter extends MiniCBaseListener {
         } else if (ctx.if_stmt() != null) {
             r4tree.put(ctx, r4tree.get(ctx.if_stmt()) + "\n");
         } else if (ctx.compound_stmt() != null) {
-            r4tree.put(ctx, r4tree.get(ctx.compound_stmt()) + "\n");
+            String expr = r4tree.get(ctx.compound_stmt());
+            r4tree.put(ctx, expr);
         } else if(ctx.expr_stmt() != null) {
             String expr = r4tree.get(ctx.expr_stmt());
-            r4tree.put(ctx, expr + "\n");
+            r4tree.put(ctx, expr);
         } else if(ctx.while_stmt() != null) {
             r4tree.put(ctx, r4tree.get(ctx.while_stmt()) + "\n");
         }
@@ -246,7 +246,23 @@ public class IRPrinter extends MiniCBaseListener {
 
     }
 
-    @Override public void exitWhile_stmt(MiniCParser.While_stmtContext ctx) { }
+    @Override public void exitWhile_stmt(MiniCParser.While_stmtContext ctx) {
+        String label0 = LabelList.getLabels();
+        String label1 = LabelList.getLabels();
+        String printL0 = label0 + ":\n";
+        String condExpr = r4tree.get(ctx.expr());
+        String printCondExpr = condExpr + ":\n";
+        String condVar = getVariable(condExpr);
+        String condTmp = TmpList.getTmp();
+        String printNotCond = condTmp + " = not " + condVar + "\n";
+        String printCjump = "cjump " + condTmp + " " + label1 + "\n";
+        String printStmt = r4tree.get(ctx.stmt()) + "\n";
+        String printJump = "jump " + label0 + "\n";
+        String printL1 = label1 + ":";
+        String resultCode = printL0 + printCondExpr + printNotCond + printCjump + printStmt + printJump + printL1;
+        r4tree.put(ctx, resultCode);
+
+    }
 
 
     @Override public void exitCompound_stmt(MiniCParser.Compound_stmtContext ctx) {
@@ -258,7 +274,7 @@ public class IRPrinter extends MiniCBaseListener {
             resultCode += r4tree.get(ctx.stmt(i));
         }
         r4tree.put(ctx, resultCode);
-        System.out.println(resultCode);
+
     }
 
     @Override public void exitLocal_decl(MiniCParser.Local_declContext ctx) {
@@ -323,9 +339,17 @@ public class IRPrinter extends MiniCBaseListener {
             r4tree.put(ctx, ctx.LITERAL().getText());
             return;
         }
-
         // ident = lit
-        if (ctx.IDENT() != null && ctx.getChild(2).getChildCount() == 3 && ctx.expr().size() == 1) {
+        if (ctx.IDENT() != null && ctx.getChild(0).getChildCount() == 0 && ctx.expr().size() == 1) {
+            String ident = ctx.IDENT().getText();
+            String srcExpr = r4tree.get(ctx.expr(0));
+            String opnd1 = srcExpr;
+            resultCode = ident + " = " + opnd1;
+            r4tree.put(ctx, resultCode);
+            return;
+        }
+        // ident = expr
+        if (ctx.IDENT() != null && ctx.getChild(0).getChildCount() != 0 && ctx.expr().size() == 1) {
             String ident = ctx.IDENT().getText();
             String srcExpr = r4tree.get(ctx.expr(0));
             String beforeExpr = srcExpr + "\n";
@@ -360,6 +384,16 @@ public class IRPrinter extends MiniCBaseListener {
             return;
         }
         // ++ -- op IDENT
+        if (ctx.getChild(1).getChildCount() == 1 && ctx.getChildCount() == 2 && ctx.expr().size() == 1 ) {
+            String srcExpr = r4tree.get(ctx.expr(0));
+            String opnd1 = getVariable(srcExpr);
+            String tmp = TmpList.getTmp();
+            String opcode = toUnaryOp(ctx.getChild(0).getText());
+            resultCode = tmp + " = " + opcode + " " + opnd1;
+            r4tree.put(ctx, resultCode);
+            return;
+        }
+        // ++ -- op expr
          if (ctx.getChildCount() == 2 && ctx.expr().size() == 1 ) {
             String srcExpr = r4tree.get(ctx.expr(0));
             String opnd1 = getVariable(srcExpr);

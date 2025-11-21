@@ -1,0 +1,9 @@
+function main ()V
+l0:
+t0 = x gt 10:
+t2 = not t0
+cjump t2 l1
+t1 = inc x
+jump l0
+l1:
+end function

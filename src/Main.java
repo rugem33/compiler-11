@@ -17,8 +17,8 @@ public class Main {
         IRPrinter irPrinter = new IRPrinter();
         walker.walk(irPrinter, tree);
         FileWriter fw = new FileWriter("./output.ir");
+        System.out.println(irPrinter.irResult.toString());
         fw.write(irPrinter.irResult.toString());
         fw.close();
-
     }
 }
