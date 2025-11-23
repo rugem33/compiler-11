@@ -316,6 +316,9 @@ public class IRPrinter extends MiniCBaseListener {
             }else{
                 // return ident or lit
                 String returnVal = "return " + getVariable(srcExpr);
+                if(returnVal.lastIndexOf("\n") != returnVal.length()-1){
+                    returnVal += "\n";
+                }
                 String resultCode = returnVal;
                 r4tree.put(ctx, resultCode);
             }
