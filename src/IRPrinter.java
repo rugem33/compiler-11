@@ -33,33 +33,14 @@ class LabelList {
 
     private static int labelsNum = -1;
 
-    // 다음 labels 이름 하나 꺼내기
     public static String getLabels() {
         if (labelsNum + 1 >= Labels.values().length) {
-            throw new IllegalStateException("더 이상 사용할 수 있는 labels가 없습니다.");
-            // 혹은: labelsNum = -1; 처럼 다시 처음으로 돌려도 되고
+            throw new IllegalStateException("더 이상 사용할 수 있는 labels가 없습니다");
         }
         labelsNum++;
         return Labels.values()[labelsNum].getLabel();
     }
 
-    // 하나 되돌리기
-    public static void returnLabels() {
-        labelsNum--;
-        // 아니면 음수로 내려가면 예외 던지게 해도 됨
-    }
-
-    public static String getCurrentLabels() {
-        return Labels.values()[labelsNum].getLabel();
-    }
-
-    public static String getLabelsIndex(int i) {
-        return Labels.values()[i].getLabel();
-    }
-
-    public static int getCurrentIndex() {
-        return labelsNum;
-    }
 }
 class TmpList {
     enum Tmp {
@@ -98,32 +79,17 @@ class TmpList {
 
     private static int tmpNum = -1;
 
-    // 다음 tmp 이름 하나 꺼내기
     public static String getTmp() {
         if (tmpNum + 1 >= Tmp.values().length) {
-            throw new IllegalStateException("더 이상 사용할 수 있는 tmp가 없습니다.");
-            // 혹은: tmpNum = -1; 처럼 다시 처음으로 돌려도 되고
+            throw new IllegalStateException("더 이상 사용할 수 있는 tmp가 없습니다");
         }
         tmpNum++;
         return Tmp.values()[tmpNum].getLabel();
     }
 
-    // 하나 되돌리기
-    public static void returnTmp() {
-        tmpNum--;
-        // 아니면 음수로 내려가면 예외 던지게 해도 됨
-    }
 
     public static String getCurrentTmp() {
         return Tmp.values()[tmpNum].getLabel();
-    }
-
-    public static String getTmpIndex(int i) {
-        return Tmp.values()[i].getLabel();
-    }
-
-    public static int getCurrentIndex() {
-        return tmpNum;
     }
 }
 
@@ -334,11 +300,6 @@ public class IRPrinter extends MiniCBaseListener {
             r4tree.put(ctx, resultCode);
         }
     }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation does nothing.</p>
-     */
 
     @Override public void exitReturn_stmt(MiniCParser.Return_stmtContext ctx) {
         if (ctx.getChildCount() == 2) {
@@ -363,13 +324,13 @@ public class IRPrinter extends MiniCBaseListener {
 
     @Override public void exitExpr(MiniCParser.ExprContext ctx) {
         String resultCode;
-        // (a) IDENT
+        // IDENT
         if (ctx.IDENT() != null && ctx.getChildCount() == 1 ) {
             r4tree.put(ctx, ctx.IDENT().getText());
             return;
         }
 
-        // (b) LITERAL
+        // LITERAL
         if (ctx.LITERAL() != null && ctx.getChildCount() == 1) {
             r4tree.put(ctx, ctx.LITERAL().getText());
             return;
@@ -394,7 +355,7 @@ public class IRPrinter extends MiniCBaseListener {
             return;
         }
 
-        // (c) a + b 같은 expr op expr
+        // expr op expr
         if (ctx.getChildCount() == 3 && ctx.expr().size() == 2) {
             String srcExpr1 = r4tree.get(ctx.expr(0));
             String srcExpr2 = r4tree.get(ctx.expr(1));
@@ -409,12 +370,9 @@ public class IRPrinter extends MiniCBaseListener {
             if (srcExpr2.contains(" ")){
                 beforeExpr += srcExpr2;
             }
-            // 3주소 코드 한 줄 생성
+
             resultCode = beforeExpr + tmp + " = " + opnd1 + " " + opcode + " "  + opnd2;
 
-            // 출력용 버퍼에 추가
-
-            // 이 expr의 값은 tmp 라고 저장 (위쪽에서 또 쓸 수 있게)
             r4tree.put(ctx, resultCode + "\n");
             return;
         }
