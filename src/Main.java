@@ -14,7 +14,7 @@ public class Main {
         ParseTree tree = parser.program();
 
         ParseTreeWalker walker = new ParseTreeWalker();
-        IRPrinter irPrinter = new IRPrinter();
+        MiniC2IR irPrinter = new MiniC2IR();
         walker.walk(irPrinter, tree);
         FileWriter fw = new FileWriter("./output.ir");
         System.out.println(irPrinter.irResult.toString());

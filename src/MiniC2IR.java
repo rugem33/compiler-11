@@ -1,101 +1,11 @@
 import generated.*;
-import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-class LabelList {
-    enum Labels {
-        l0("l0"),
-        l1("l1"),
-        l2("l2"),
-        l3("l3"),
-        l4("l4"),
-        l5("l5"),
-        l6("l6"),
-        l7("l7"),
-        l8("l8"),
-        l9("l9"),
-        l10("l10"),
-        l11("l11"),
-        l12("l12"),
-        l13("l13"),
-        l14("l14"),
-        l15("l15");
 
-        private final String label;
-
-        Labels(String label) {
-            this.label = label;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-    }
-
-    private static int labelsNum = -1;
-
-    public static String getLabels() {
-        if (labelsNum + 1 >= Labels.values().length) {
-            throw new IllegalStateException("더 이상 사용할 수 있는 labels가 없습니다");
-        }
-        labelsNum++;
-        return Labels.values()[labelsNum].getLabel();
-    }
-
-}
-class TmpList {
-    enum Tmp {
-        t0("t0"),
-        t1("t1"),
-        t2("t2"),
-        t3("t3"),
-        t4("t4"),
-        t5("t5"),
-        t6("t6"),
-        t7("t7"),
-        t8("t8"),
-        t9("t9"),
-        t10("t10"),
-        t11("t11"),
-        t12("t12"),
-        t13("t13"),
-        t14("t14"),
-        t15("t15"),
-        t16("t16"),
-        t17("t17"),
-        t18("t18"),
-        t19("t19"),
-        t20("t20");
-
-        private final String label;
-
-        Tmp(String label) {
-            this.label = label;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-    }
-
-    private static int tmpNum = -1;
-
-    public static String getTmp() {
-        if (tmpNum + 1 >= Tmp.values().length) {
-            throw new IllegalStateException("더 이상 사용할 수 있는 tmp가 없습니다");
-        }
-        tmpNum++;
-        return Tmp.values()[tmpNum].getLabel();
-    }
-
-
-    public static String getCurrentTmp() {
-        return Tmp.values()[tmpNum].getLabel();
-    }
-}
-
-public class IRPrinter extends MiniCBaseListener {
+public class MiniC2IR extends MiniCBaseListener {
     public StringBuilder irResult = new StringBuilder();
     ParseTreeProperty<String> r4tree = new ParseTreeProperty<>();
+    MiniCTmpList TmpList = new MiniCTmpList();
+    MiniCLabelList LabelList = new MiniCLabelList();
 
     private String getVariable (String inputText){
         String var;
