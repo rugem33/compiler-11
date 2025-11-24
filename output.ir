@@ -3,7 +3,6 @@ t0 = x leq 1
 t1 = not t0
 cjump t1 l0
 return 1
-
 l0:
 t2 = i sub 1
 t3 = call fac(t2)
@@ -38,7 +37,6 @@ t15 = z leq 1
 t17 = not t15
 cjump t17 l3
 return 1
-
 jump l4
 l3:
 t16 = 1 add z

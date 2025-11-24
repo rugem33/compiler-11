@@ -187,7 +187,10 @@ public class MiniC2IR extends MiniCBaseListener {
             String label2 = LabelList.getLabels();
 
             String printCjump = "cjump " + tmp + " " + label1 + "\n";
-            String printStmt1 = r4tree.get(ctx.stmt(0)) + "\n";
+            String printStmt1 = r4tree.get(ctx.stmt(0));
+            if(printStmt1.lastIndexOf("\n") != printStmt1.length()-1){
+                printStmt1 += "\n";
+            }
             String printJump = "jump " + label2 + "\n";
             String lb1 = label1 + ":\n";
             String printStmt2 = r4tree.get(ctx.stmt(1));
@@ -204,7 +207,10 @@ public class MiniC2IR extends MiniCBaseListener {
             String label1 = LabelList.getLabels();
 
             String printCjump = "cjump " + tmp + " " + label1 + "\n";
-            String printStmt1 = r4tree.get(ctx.stmt(0)) + "\n";
+            String printStmt1 = r4tree.get(ctx.stmt(0));
+            if(printStmt1.lastIndexOf("\n") != printStmt1.length()-1){
+                printStmt1 += "\n";
+            }
             String lb1 = label1 + ":\n";
             String resultCode = printCondExpr + printCond + printCjump + printStmt1 + lb1;
             r4tree.put(ctx, resultCode);
